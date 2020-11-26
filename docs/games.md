@@ -111,7 +111,7 @@ In Dou Dizhu environment, we encode the state into 6 feature planes. The size of
 
 ### Action Abstraction of Dou Dizhu
 
-The size of the action space of Dou Dizhu is 33676. This number is too large for learning algorithms. Thus, we make abstractions to the original action space and obtain 309 actions. We note that some recent studies also use similar abstraction techniques. The main idea of the abstraction is to make the kicker fuzzy and only focus on the major part of the combination. For example, "33345" is abstracted as "333
+The size of the action space of Dou Dizhu is 27472. This number is too large for learning algorithms. Thus, we make abstractions to the original action space and obtain 309 actions. We note that some recent studies also use similar abstraction techniques. The main idea of the abstraction is to make the kicker fuzzy and only focus on the major part of the combination. For example, "33344" is abstracted as "333
 \*\*". When the predicted action of the agent is **not legal**, the agent will choose "**pass**.". Thus, the current environment is simple, since once the agent learns how to play legal actions, it can beat random agents. Users can also encode the actions for their own purposes (such as increasing the difficulty of the environment) by modifying `decode_action` function in [rlcard/envs/doudizhu.py](../rlcard/envs/doudizhu.py). Users are also encouraged to include rule-based agents as opponents. The abstractions in the environment are as below. The detailed  mapping of action and its ID is in [rlcard/games/doudizhu/jsondata/action_space.json](../rlcard/games/doudizhu/jsondata/action_space.json):
 
 | Type             | Number of Actions | Number of Actions after Abstraction | Action ID         |
@@ -124,14 +124,14 @@ The size of the action space of Dou Dizhu is 33676. This number is too large for
 | Chain of solo    |       36          |        36                           | 67-102            |
 | Chain of pair    |       52          |        52                           | 103-154           |
 | Chain of trio    |        45         |        45                           | 155-199           |
-| Plane with solo  |        24721      |        38                           | 200-237           |
-| Plane with pair  |        6552       |        30                           | 238-267           |
-| Quad with solo   |       1339        |        13                           | 268-280           |
-| Quad with pair   |       1014        |        13                           | 281-293           |
+| Plane with solo  |        21822      |        38                           | 200-237           |
+| Plane with pair  |        2939       |        30                           | 238-267           |
+| Quad with solo   |       1326        |        13                           | 268-280           |
+| Quad with pair   |       858        |        13                           | 281-293           |
 | Bomb             |        13         |        13                           | 294-306           |
 | Rocket           |         1         |         1                           | 307               |
 | Pass             |         1         |         1                           | 308               |
-| Total            |       33676       |        309                          |                   |
+| Total            |       27472       |        309                          |                   |
 
 ### Payoff
 If the landlord first get rid of all the cards in his hand, he will win and receive a reward 1. The two peasants will lose and receive a reward 0. Similarly, if one of the peasant first get rid of all the cards in hand, both peasants will win and receive a reward 1. The landlord will lose and receive a reward 0.
