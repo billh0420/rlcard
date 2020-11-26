@@ -1,6 +1,10 @@
+import itertools
 import unittest
+
+from rlcard.games.limitholdem.judger import LimitholdemJudger
 from rlcard.games.limitholdem.utils import compare_hands
 from rlcard.games.limitholdem.utils import Hand as Hand
+import numpy as np
 ''' Combinations selected for testing compare_hands function
 Royal straight flush ['CJ', 'CT', 'CQ', 'CK', 'C9', 'C8', 'CA']
 Straight flush ['CJ', 'CT', 'CQ', 'CK', 'C9', 'C8', 'C7']
@@ -242,6 +246,113 @@ class TestHoldemUtils(unittest.TestCase):
         self.assertEqual(winner, [0, 1])
         winner = compare_hands( [['CK', 'SJ', 'H9', 'C7', 'C6', 'B3', 'C2'], ['CK', 'SJ', 'H9', 'C7', 'C6', 'B3', 'C2']])
         self.assertEqual(winner, [1, 1])
+        winner = compare_hands([['C5', 'S9', 'S6', 'C2', 'CT', 'C7', 'H5'], ['S7', 'SJ', 'S6', 'C2', 'CT', 'C7', 'H5'], None, None, ['H7', 'DJ', 'S6', 'C2', 'CT', 'C7', 'H5'], None])
+        self.assertEqual(winner, [0, 1, 0, 0, 1, 0])
+
+        winner = compare_hands([['H3', 'D5', 'S6', 'H9', 'CA', 'HA', 'SA'],   # three of a kind
+                                ['H2', 'H3', 'C4', 'D5', 'C6', 'S6', 'ST']])  # straight
+        self.assertEqual(winner, [0, 1])
+
+        winner = compare_hands([['H3', 'D5', 'S6', 'H9', 'CA', 'HA', 'SA'],   # three of a kind
+                                ['H2', 'H3', 'C4', 'D5', 'CQ', 'SK', 'SA']])  # straight beginning with A
+        self.assertEqual(winner, [0, 1])
+
+        winner = compare_hands([['H5', 'HQ', 'C2', 'D3', 'S4', 'S5', 'HT'],   # pair
+                                ['D5', 'ST', 'C2', 'D3', 'S4', 'S5', 'HA'],   # A,2,3,4,5
+                                ['H6', 'HQ', 'C2', 'D3', 'S4', 'S5', 'HT'],   # 2,3,4,5,6
+                                ['H4', 'HQ', 'C2', 'D3', 'S4', 'S5', 'HT'],   # pair
+                                ])
+        self.assertEqual(winner, [0, 0, 1, 0])
+
+        winner = compare_hands([['D5', 'ST', 'C2', 'D3', 'S4', 'S5', 'HA'],   # A,2,3,4,5
+                                ['H6', 'H7', 'CK', 'DQ', 'SJ', 'ST', 'HA'],   # T,J,Q,K,A
+                                ['HA', 'HT', 'CK', 'DQ', 'SJ', 'ST', 'DT'],   # T,J,Q,K,A
+                                ['H2', 'H3', 'C4', 'D2', 'CQ', 'S2', 'SA'],   # three of a kind
+                                ])
+        self.assertEqual(winner, [0, 1, 1, 0])
+
+        winner = compare_hands([['H5', 'HQ', 'C2', 'D3', 'S4', 'S5', 'HT'],   # pair
+                                ['D5', 'ST', 'S2', 'S3', 'S4', 'S5', 'SA'],   # A,2,3,4,5 suited
+                                ['C6', 'HQ', 'C2', 'C3', 'C4', 'C5', 'HT'],   # 2,3,4,5,6 suited
+                                ['H7', 'H6', 'C9', 'C3', 'C4', 'C5', 'HT'],   # 3,4,5,6,7 not suited
+                                ])
+        self.assertEqual(winner, [0, 0, 1, 0])
+     
+        winner = compare_hands([['S2', 'D8', 'H8', 'S7', 'S8', 'C8', 'D3'],  # 8-four of a kind, kicker 7
+                                ['S2', 'D8', 'H8', 'S9', 'S8', 'C8', 'D3'],  # 8-four of a kind, kicker 9
+                                ['H3', 'C3', 'HT', 'S3', 'ST', 'CT', 'D3'],  # 3-four of a kind, kicker T
+                                ])
+        self.assertEqual(winner, [0, 1, 0])
+
+        winner = compare_hands([['CA', 'C2', 'DJ', 'CT', 'S7', 'C5', 'ST'],  # pair T, T, kicker A, J
+                                ['S3', 'S4', 'DJ', 'CT', 'S7', 'C5', 'ST'],  # pair T, T, kicker J, 4
+                                ['HQ', 'DA', 'DJ', 'CT', 'S7', 'C5', 'ST'],  # pair T, T, kicker A, Q
+                                ['SQ', 'HA', 'DJ', 'CT', 'S7', 'C5', 'ST']   # pair T, T, kicker A, Q
+                                ])
+        self.assertEqual(winner, [0, 0, 1, 1])
+
+    def test_split_pots_among_players(self):
+        j = LimitholdemJudger(np.random.RandomState(seed=7))
+
+        # simple cases where all players bet same amount of chips
+        self.assertEqual(j.split_pots_among_players([2, 2], [0, 1]), [0, 4])
+        self.assertEqual(j.split_pots_among_players([2, 2], [1, 0]), [4, 0])
+        self.assertEqual(j.split_pots_among_players([2, 2], [1, 1]), [2, 2])
+        self.assertEqual(j.split_pots_among_players([2, 2, 2], [1, 0, 0]), [6, 0, 0])
+        self.assertEqual(j.split_pots_among_players([2, 2, 2], [0, 1, 0]), [0, 6, 0])
+        self.assertEqual(j.split_pots_among_players([2, 2, 2], [0, 0, 1]), [0, 0, 6])
+        self.assertEqual(j.split_pots_among_players([2, 2, 2], [1, 0, 1]), [3, 0, 3])
+        self.assertEqual(j.split_pots_among_players([2, 2, 2], [0, 1, 1]), [0, 3, 3])
+        self.assertEqual(j.split_pots_among_players([2, 2, 2], [1, 1, 0]), [3, 3, 0])
+        self.assertEqual(j.split_pots_among_players([2, 2, 2], [1, 1, 1]), [2, 2, 2])
+        self.assertEqual(j.split_pots_among_players([3, 3, 3], [0, 1, 1]), [0, 4, 5])
+        # for the case above 9 is not divisible by 2 so a random winner get the remainder
+
+        # trickier cases with different amounts bet (some players are all in)
+        self.assertEqual(j.split_pots_among_players([3, 2], [0, 1]), [1, 4])
+        self.assertEqual(j.split_pots_among_players([3, 2], [1, 0]), [5, 0])
+        self.assertEqual(j.split_pots_among_players([3, 2], [1, 1]), [3, 2])
+        self.assertEqual(j.split_pots_among_players([2, 4, 4], [1, 0, 0]), [6, 2, 2])
+        self.assertEqual(j.split_pots_among_players([2, 4, 4], [0, 1, 0]), [0, 10, 0])
+        self.assertEqual(j.split_pots_among_players([2, 4, 4], [0, 0, 1]), [0, 0, 10])
+        self.assertEqual(j.split_pots_among_players([2, 4, 4], [1, 1, 0]), [3, 7, 0])
+        self.assertEqual(j.split_pots_among_players([2, 4, 4], [1, 0, 1]), [3, 0, 7])
+        self.assertEqual(j.split_pots_among_players([2, 4, 4], [0, 1, 1]), [0, 5, 5])
+        self.assertEqual(j.split_pots_among_players([2, 4, 4], [1, 1, 1]), [2, 4, 4])
+        self.assertEqual(j.split_pots_among_players([1, 1, 2, 2, 3, 3], [0, 1, 0, 1, 0, 1]), [0, 2, 0, 4, 0, 6])
+
+    def test_split_pots_among_players_cases_generated(self):
+        def check_result(in_chips, winners, allocated):
+            """check that winners have won chips (more chips in allocated than in in_chips)
+               and than losers have lost chips (strictly less chips in allocated than in chips)"""
+            assert sum(allocated) == sum(in_chips)
+            for i in range(len(in_chips)):
+                if winners[i]:
+                    self.assertGreaterEqual(allocated[i], in_chips[i])
+                    # can be equal for example with 2 winners and 1 loser who has bet one chip (not divisible by 2)
+                    # so the winner who does not get the chip of the loser will have allocated[i] == in_chips[i]
+                elif in_chips[i] > 0:
+                    self.assertLess(allocated[i], in_chips[i])
+                    # because there is at least one winner so a loser who bet must lose at least one chip
+
+        randstate = np.random.RandomState(seed=7)
+        j = LimitholdemJudger(randstate)
+
+        # test many random cases from 2 to 6 players with all winners combinations
+        nb_cases = 0
+        for nb_players in range(2, 7):
+            for _ in range(300):
+                in_chips = [randstate.randint(0, 10) for _ in range(nb_players)]
+                for winners in itertools.product([0, 1], repeat=nb_players):
+                    if sum(winners) == 0:
+                        continue  # impossible case with no winner
+                    if sum(w * v for w, v in zip(winners, in_chips)) == 0:
+                        continue  # impossible case where all winners have not bet
+                    allocated = j.split_pots_among_players(in_chips, winners)
+                    nb_cases += 1
+                    check_result(in_chips, winners, allocated)
+        self.assertEqual(nb_cases, 34954)  # to check that correct number of cases have been tested
+
 
 if __name__ == '__main__':
     unittest.main()
