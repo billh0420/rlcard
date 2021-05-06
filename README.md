@@ -4,15 +4,24 @@
 [![Build Status](https://travis-ci.org/datamllab/RLCard.svg?branch=master)](https://travis-ci.org/datamllab/RLCard)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/248eb15c086748a4bcc830755f1bd798)](https://www.codacy.com/manual/daochenzha/rlcard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=datamllab/rlcard&amp;utm_campaign=Badge_Grade)
 [![Coverage Status](https://coveralls.io/repos/github/datamllab/rlcard/badge.svg)](https://coveralls.io/github/datamllab/rlcard?branch=master)
+[![Downloads](https://pepy.tech/badge/rlcard)](https://pepy.tech/project/rlcard)
+[![Downloads](https://pepy.tech/badge/rlcard/month)](https://pepy.tech/project/rlcard)
 
 RLCard is a toolkit for Reinforcement Learning (RL) in card games. It supports multiple card environments with easy-to-use interfaces. The goal of RLCard is to bridge reinforcement learning and imperfect information games. RLCard is developed by [DATA Lab](http://faculty.cs.tamu.edu/xiahu/) at Texas A&M University and community contributors.
 
 *   Official Website: [http://www.rlcard.org](http://www.rlcard.org)
 *   Tutorial in Jupyter Notebook: [https://github.com/datamllab/rlcard-tutorial](https://github.com/datamllab/rlcard-tutorial)
 *   Paper: [https://arxiv.org/abs/1910.04376](https://arxiv.org/abs/1910.04376)
+*   GUI: [RLCard-Showdown](https://github.com/datamllab/rlcard-showdown)
 *   Resources: [Awesome-Game-AI](https://github.com/datamllab/awesome-game-ai)
 
+**Community:**
+*  **Slack**: Discuss in our [#rlcard-project](https://join.slack.com/t/rlcard/shared_invite/zt-l4qbarxs-mtBrjBRpYIMq4Re4jvYpWQ) slack channel.
+*  **QQ Group**: Join our QQ group 665647450. Password: rlcardqqgroup
+
 **News:**
+*   Our package is used in [PettingZoo](https://github.com/PettingZoo-Team/PettingZoo). Please check it out!
+*   We have released RLCard-Showdown, GUI demo for RLCard. Please check out [here](https://github.com/datamllab/rlcard-showdown)!
 *   Jupyter Notebook tutorial available! We add some examples in R to call Python interfaces of RLCard with reticulate. See [here](docs/toy-examples-r.md)
 *   Thanks for the contribution of [@Clarit7](https://github.com/Clarit7) for supporting different number of players in Blackjack. We call for contributions for gradually making the games more configurable. See [here](CONTRIBUTING.md#making-configurable-environments) for more details.
 *   Thanks for the contribution of [@Clarit7](https://github.com/Clarit7) for the Blackjack and Limit Hold'em human interface.
@@ -80,7 +89,7 @@ We also recommend the following **toy examples** in Python.
 *   [Playing with random agents](docs/toy-examples.md#playing-with-random-agents)
 *   [Deep-Q learning on Blackjack](docs/toy-examples.md#deep-q-learning-on-blackjack)
 *   [Running multiple processes](docs/toy-examples.md#running-multiple-processes)
-*   [Training CFR on Leduc Hold'em](docs/toy-examples.md#training-cfr-on-leduc-holdem)
+*   [Training CFR (chance sampling) on Leduc Hold'em](docs/toy-examples.md#training-cfr-on-leduc-holdem)
 *   [Having fun with pretrained Leduc model](docs/toy-examples.md#having-fun-with-pretrained-leduc-model)
 *   [Leduc Hold'em as single-agent environment](docs/toy-examples.md#leduc-holdem-as-single-agent-environment)
 
@@ -123,6 +132,10 @@ Agent 1: +++
 
 >> You choose action (integer):
 ```
+We also provide a GUI for easy debugging. Please check [here](https://github.com/datamllab/rlcard-showdown/). Some demos:
+
+![doudizhu-replay](https://github.com/datamllab/rlcard-showdown/blob/master/docs/imgs/doudizhu-replay.png?raw=true)
+![leduc-replay](https://github.com/datamllab/rlcard-showdown/blob/master/docs/imgs/leduc-replay.png?raw=true)
 
 ## Available Environments
 We provide a complexity estimation for the games on several aspects. **InfoSet Number:** the number of information sets; **InfoSet Size:** the average number of states in a single information set; **Action Size:** the size of the action space. **Name:** the name that should be passed to `rlcard.make` to create the game environment. We also provide the link to the documentation and the random example.
@@ -170,7 +183,7 @@ The following interfaces provide a basic usage. It is easy to use but it has ass
 For advanced usage, the following interfaces allow flexible operations on the game tree. These interfaces do not make any assumtions on the agent.
 *   **env.reset()**: Initialize a game. Return the state and the first player ID.
 *   **env.step(action, raw_action=False)**: Take one step in the environment. `action` can be raw action or integer; `raw_action` should be `True` if the action is raw action (string).
-*   **env.step_back()**: Available only when `allow_step_back` is `True`. Take one step backward. This can be used for algorithms that operate on the game tree, such as CFR.
+*   **env.step_back()**: Available only when `allow_step_back` is `True`. Take one step backward. This can be used for algorithms that operate on the game tree, such as CFR (chance sampling).
 *   **env.is_over()**: Return `True` if the current game is over. Otherewise, return `False`.
 *   **env.get_player_id()**: Return the Player ID of the current player.
 *   **env.get_state(player_id)**: Return the state that corresponds to `player_id`.
@@ -199,6 +212,7 @@ For your information, there is a nice online evaluation platform [pokerwars](htt
 
 ## More Documents
 For more documentation, please refer to the [Documents](docs/README.md) for general introductions. API documents are available at our [website](http://www.rlcard.org).
+
 
 ## Contributing
 Contribution to this project is greatly appreciated! Please create an issue for feedbacks/bugs. If you want to contribute codes, please refer to [Contributing Guide](./CONTRIBUTING.md).
